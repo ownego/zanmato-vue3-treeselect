@@ -98,6 +98,15 @@ export default {
     };
   },
 
+  emits: [
+    "update:modelValue",
+    "search-change",
+    "close",
+    "open",
+    "select",
+    "deselect"
+  ],
+
   props: {
     /**
      * Whether to allow resetting value even if there are disabled selected nodes.

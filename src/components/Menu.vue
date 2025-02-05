@@ -14,6 +14,9 @@ const directionMap = {
 
 export default {
   name: "vue3-treeselect--menu",
+  compatConfig: {
+    RENDER_FUNCTION: false
+  },
   inject: ["instance"],
 
   computed: {
