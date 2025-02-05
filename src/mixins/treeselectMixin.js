@@ -284,6 +284,15 @@ export default {
     },
 
     /**
+     * The default set of options to show before the user starts searching. Used for async search mode.
+     * When set to `true`, the results for search query as a empty string will be autoloaded.
+     * @type {boolean|node[]}
+     */
+    defaultOptions: {
+      default: false
+    },
+
+    /**
      * Whether pressing delete key removes the last item if there is no text input.
      */
     deleteRemoves: {
@@ -920,6 +929,10 @@ export default {
 
     options: {
       handler() {
+        if (this.async) {
+          return;
+        }
+
         // Re-initialize options when the `options` prop has changed.
         this.initialize();
         this.rootOptionsStates.isLoaded = Array.isArray(this.options);
@@ -997,10 +1010,9 @@ export default {
     },
 
     initialize() {
-      const options =
-        this.async && this.trigger.searchQuery !== ""
-          ? this.getRemoteSearchEntry().options
-          : this.options;
+      const options = this.async
+        ? this.getRemoteSearchEntry().options
+        : this.options;
 
       if (Array.isArray(options)) {
         // In case we are re-initializing options, keep the old state tree temporarily.
@@ -1110,8 +1122,8 @@ export default {
           ? this.modelValue
           : []
         : this.modelValue
-        ? [this.modelValue]
-        : [];
+          ? [this.modelValue]
+          : [];
       const matched = find(
         valueArray,
         (node) => node && this.enhancedNormalizer(node).id === id
@@ -1457,8 +1469,11 @@ export default {
       };
 
       if (searchQuery === "") {
-        if (Array.isArray(this.options)) {
-          entry.options = this.options;
+        if (Array.isArray(this.defaultOptions)) {
+          entry.options = this.defaultOptions;
+          entry.isLoaded = true;
+          return entry;
+        } else if (this.defaultOptions !== true) {
           entry.isLoaded = true;
           return entry;
         }
@@ -1631,7 +1646,7 @@ export default {
       this.menu.isOpen = true;
       this.$nextTick(this.resetHighlightedOptionWhenNecessary);
       this.$nextTick(this.restoreMenuScrollPosition);
-      if (!this.options) {
+      if (!this.options && !this.async) {
         this.loadRootOptions();
       }
       this.toggleClickOutsideEvent(true);
@@ -1975,8 +1990,7 @@ export default {
           `Detected duplicate presence of node id ${JSON.stringify(
             node.id
           )}. ` +
-          `Their labels are "${this.forest.nodeMap[node.id].label}" and "${
-            node.label
+          `Their labels are "${this.forest.nodeMap[node.id].label}" and "${node.label
           }" respectively.`
       );
     },
@@ -2212,11 +2226,14 @@ export default {
     if (this.autoFocus) {
       this.focusInput();
     }
-    if (!this.options && this.autoLoadRootOptions) {
+    if (!this.options && !this.async && this.autoLoadRootOptions) {
       this.loadRootOptions();
     }
     if (this.alwaysOpen) {
       this.openMenu();
+    }
+    if (this.async && this.defaultOptions) {
+      this.handleRemoteSearch();
     }
   },
 

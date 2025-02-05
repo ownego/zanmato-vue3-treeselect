@@ -153,7 +153,7 @@ export default {
       const { instance } = this;
       const isSearching = instance.trigger.searchQuery !== "";
 
-      if (!isSearching && !instance.options) {
+      if (!isSearching && !instance.defaultOptions) {
         return this.renderSearchPromptTip();
       }
 
