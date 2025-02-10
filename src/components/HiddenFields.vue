@@ -19,7 +19,6 @@ export default defineComponent({
   compatConfig: {
     RENDER_FUNCTION: false
   },
-  functional: true,
   inject: ["instance"],
 
   render(context) {
